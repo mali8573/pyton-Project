@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div style="font-size: 45px; margin-bottom: 20px;">⚠️</div>
+    <h1 style="color: #ef4444;">Are you sure?</h1>
+    <p style="color: var(--text-dim); margin-bottom: 30px;">You are about to delete:<br><strong style="color: #fff;">{{task.name}}</strong></p>
+
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" style="border-color: #ef4444; color: #ef4444;">CONFIRM DELETE</button>
+    </form>
+
+    <a href="{% url 'all_tasks' %}" style="display: block; margin-top: 20px; color: var(--text-dim); text-decoration: none;">Go back</a>
+{% endblock %}

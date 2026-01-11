@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="auth-card">
+    <div style="font-size: 40px; margin-bottom: 10px;">✨</div>
+    <h2 style="margin-bottom: 5px;">Welcome</h2>
+    <p style="color: #94a3b8; margin-bottom: 30px;">הזן פרטים כדי להמשיך</p>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">אישור וכניסה</button>
+    </form>
+</div>
+{% endblock %}

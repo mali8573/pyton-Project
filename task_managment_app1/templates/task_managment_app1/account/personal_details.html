@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="auth-card">
+    <div style="font-size: 40px; margin-bottom: 10px;">👤</div>
+
+    <h2 style="margin-bottom: 5px;">פרטי חשבון</h2>
+    <p style="color: #94a3b8; margin-bottom: 30px;">עדכן את הפרטים האישיים והמקצועיים שלך</p>
+
+    <form method="post" class="styled-account-form">
+        {% csrf_token %}
+
+        <div class="form-group">
+            {{ user_form.as_p }}
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 20px 0;">
+
+        <div class="form-group">
+            {{ worker_form.as_p }}
+        </div>
+
+        <button type="submit" style="margin-top: 20px;">שמור שינויים</button>
+    </form>
+</div>
+
+<style>
+    /* הוספת התאמות ספציפיות כדי שהטפסים של Django יראו טוב בתוך ה-auth-card */
+    .styled-account-form p {
+        text-align: right;
+        margin-bottom: 15px;
+        color: #475569;
+    }
+
+    .styled-account-form input,
+    .styled-account-form select {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        margin-top: 5px;
+        box-sizing: border-box;
+    }
+
+    .styled-account-form label {
+        display: block;
+        font-weight: 600;
+        font-size: 14px;
+        margin-bottom: 2px;
+    }
+</style>
+{% endblock %}

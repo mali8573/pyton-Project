@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>TaskMaster</title>
+    <style>
+        :root {
+            --bg-deep: #020617;
+            --card-bg: #0f172a;
+            --accent: #6366f1;
+            --input-bg: #1e293b;
+        }
+
+        body {
+            background-color: var(--bg-deep);
+            color: #f8fafc;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* עיצוב כרטיסיית התחברות/הרשמה עם הצללה במעבר עכבר */
+        .auth-card {
+            background: var(--card-bg);
+            padding: 45px;
+            border-radius: 28px;
+            border: 1px solid #1e293b;
+            width: 100%;
+            max-width: 420px;
+            margin: 60px auto;
+            text-align: center;
+            transition: all 0.4s ease;
+        }
+        .auth-card:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.2);
+            transform: translateY(-5px);
+        }
+
+        /* ביטול התיבות הלבנות - פתרון מוחלט */
+        input, select, textarea {
+            background-color: var(--input-bg) !important;
+            color: white !important;
+            border: 1px solid #334155 !important;
+            border-radius: 12px !important;
+            padding: 14px !important;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        /* מניעת רקע לבן במילוי אוטומטי של סיסמאות */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover,
+        input:-webkit-autofill:focus {
+            -webkit-box-shadow: 0 0 0 1000px var(--input-bg) inset !important;
+            -webkit-text-fill-color: white !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
+        button {
+            background: transparent;
+            border: 2px solid var(--accent);
+            color: white;
+            padding: 14px;
+            border-radius: 12px;
+            width: 100%;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: var(--accent);
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
+        }
+
+        nav { background: #080c1d; padding: 20px; text-align: center; border-bottom: 1px solid #1e293b; }
+        nav a { color: #94a3b8; text-decoration: none; margin: 0 15px; font-weight: 500; }
+        nav a:hover { color: var(--accent); }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'home' %}">דף הבית</a>
+        <a href="{% url 'all_tasks' %}">כל המשימות</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'personal_details' %}">פרופיל</a>
+            <a href="{% url 'logout' %}">התנתק</a>
+        {% else %}
+            <a href="{% url 'login' %}">התחברות</a>
+            <a href="{% url 'register' %}">הרשמה</a>
+        {% endif %}
+    </nav>
+    <div style="width: 95%; margin: 0 auto; flex-grow: 1;">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>
