@@ -163,6 +163,89 @@
         /* מוודא שהשדה לא ישנה גובה כשהטייפ משתנה */
         .pw-wrapper input[type="text"],
         .pw-wrapper input[type="password"] { transition: none; }
+
+        /* שיפור עיצוב של Select (סגור) */
+        select {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-color: var(--input-bg) !important;
+            color: #e6eef8 !important;
+            border: 1px solid #334155 !important;
+            border-radius: 12px !important;
+            padding: 14px !important;
+            padding-inline-start: 44px !important; /* מרווח עבור החץ (RTL) */
+            padding-inline-end: 14px !important;
+            width: 100%;
+            box-sizing: border-box;
+            outline: none;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%2394a3b8' d='M7 10l5 5 5-5z'/></svg>");
+            background-repeat: no-repeat;
+            background-position: left 12px center; /* בחיבור RTL - החץ בצד שמאל */
+            background-size: 14px;
+            cursor: pointer;
+        }
+        select:hover, select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px rgba(99,102,241,0.08);
+        }
+
+        /* ניסיון לשנות גם את העיצוב של האפשרויות - עובד בדפדפנים שתומכים בזה */
+        select option {
+            background-color: var(--card-bg);
+            color: #e6eef8;
+            padding: 8px;
+        }
+
+        /* חלופה מותאמת (כשצריך שליטה מלאה על הרשימה) */
+        .custom-select { position: relative; }
+        .cs-btn {
+            background: var(--input-bg);
+            color: #e6eef8;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 14px;
+            width: 100%;
+            text-align: start;
+            cursor: pointer;
+            padding-inline-start: 14px;
+            padding-inline-end: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .cs-list {
+            position: absolute;
+            inset-inline-start: 0;
+            inset-inline-end: 0;
+            margin-top: 8px;
+            background: var(--card-bg);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            max-height: 240px;
+            overflow: auto;
+            z-index: 60;
+            display: none;
+            box-shadow: 0 6px 18px rgba(2,6,23,0.6);
+        }
+        .cs-item {
+            padding: 10px 14px;
+            color: #e6eef8;
+            cursor: pointer;
+        }
+        .cs-item:hover { background: rgba(99,102,241,0.06); color: #fff; }
+        .cs-item.selected { background: rgba(99,102,241,0.12); }
+        /* כפתור קטן לחצים במצב פתוח */
+        .cs-btn::after {
+            content: '';
+            width: 0; height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #94a3b8;
+            transform: rotate(0deg);
+            margin-inline-start: 8px;
+        }
+        .cs-btn.open::after { transform: rotate(180deg); border-top-color: #cbd5e1; }
     </style>
 </head>
 <body>
@@ -226,6 +309,80 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         wrapper.appendChild(btn);
+    });
+
+    // המרה אוטומטית של SELECT ל-"custom select" נגיש
+    document.querySelectorAll('select').forEach(function (sel) {
+        // תאפשר לדלג אם רוצים לשמר את dropdown המקורי: data-custom="false"
+        if (sel.dataset.custom === 'false') return;
+
+        // אם הדפדפן מציג את האפשרויות לבן ולרוצים שליטה מלאה - נבנה רשימה מותאמת
+        const wrapper = document.createElement('div');
+        wrapper.className = 'custom-select';
+        sel.parentNode.insertBefore(wrapper, sel);
+        wrapper.appendChild(sel);
+        sel.style.display = 'none'; // נשאיר אותו לקליטה בטופס
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'cs-btn';
+        btn.setAttribute('aria-haspopup', 'listbox');
+        btn.setAttribute('aria-expanded', 'false');
+        btn.textContent = sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : '';
+        wrapper.appendChild(btn);
+
+        const list = document.createElement('div');
+        list.className = 'cs-list';
+        list.setAttribute('role', 'listbox');
+
+        Array.from(sel.options).forEach(function (opt) {
+            const item = document.createElement('div');
+            item.className = 'cs-item';
+            item.setAttribute('role', 'option');
+            item.dataset.value = opt.value;
+            item.textContent = opt.text;
+            if (opt.disabled) item.classList.add('disabled');
+            if (opt.selected) item.classList.add('selected');
+            item.addEventListener('click', function () {
+                sel.value = this.dataset.value;
+                sel.dispatchEvent(new Event('change', { bubbles: true }));
+                btn.textContent = this.textContent;
+                list.style.display = 'none';
+                btn.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+                // עדכון סימון ויזואלי
+                list.querySelectorAll('.cs-item').forEach(i => i.classList.remove('selected'));
+                this.classList.add('selected');
+            });
+            list.appendChild(item);
+        });
+
+        wrapper.appendChild(list);
+
+        btn.addEventListener('click', function (e) {
+            e.stopPropagation();
+            const opened = list.style.display === 'block';
+            document.querySelectorAll('.cs-list').forEach(l => (l.style.display = 'none'));
+            document.querySelectorAll('.cs-btn').forEach(b => b.classList.remove('open'));
+            if (!opened) {
+                list.style.display = 'block';
+                btn.classList.add('open');
+                btn.setAttribute('aria-expanded', 'true');
+            } else {
+                list.style.display = 'none';
+                btn.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
+
+        // סגירה בלחיצה מחוץ
+        document.addEventListener('click', function (e) {
+            if (!wrapper.contains(e.target)) {
+                list.style.display = 'none';
+                btn.classList.remove('open');
+                btn.setAttribute('aria-expanded', 'false');
+            }
+        });
     });
 });
     </script>
