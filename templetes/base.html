@@ -3,6 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>TaskMaster</title>
+    {% load static %}
+    <link rel="icon" type="image/svg+xml" href="{% static 'icons/favicon.svg' %}">
+    <link rel="icon" type="image/png" href="{% static 'icons/favicon-32.png' %}" sizes="32x32">
+    <link rel="shortcut icon" href="{% static 'icons/favicon-32.png' %}">
     <style>
         :root {
             --bg-deep: #020617;
@@ -77,13 +81,106 @@
             box-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
         }
 
-        nav { background: #080c1d; padding: 20px; text-align: center; border-bottom: 1px solid #1e293b; }
+        nav { background: #080c1d; padding: 20px; border-bottom: 1px solid #1e293b; position: relative; display: flex; align-items: center; justify-content: center; gap: 15px; }
         nav a { color: #94a3b8; text-decoration: none; margin: 0 15px; font-weight: 500; }
         nav a:hover { color: var(--accent); }
+
+        /* מיתוג: אייקון + טקסט בצד השמאלי (ב‑RTL זה יהיה בצד השמאלי של המסך) */
+        .brand {
+            position: absolute;
+                inset-inline-end: 20px; /* תומך ב‑RTL/LTR */
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #e6eef8;
+            font-weight: 700;
+            text-decoration: none;
+            z-index: 10;
+        }
+        .brand svg { width: 28px; height: 28px; display: block; }
+        .brand .brand-title { font-size: 1rem; color: #e6eef8; }
+
+        .nav-userbox {
+            position: absolute;
+            inset-inline-start: 20px; /* מציב בצד השני ביחס ל־.brand */
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 2px;
+            z-index: 10;
+            text-align: left;
+            color: #e6eef8;
+        }
+        .nav-userbox p { margin: 0; line-height: 1; }
+        .nav-username { font-weight: 700; font-size: 1rem; }
+        .nav-fullname { color: #cbd5e1; font-size: 0.85rem; }
+        .nav-role { color: #94a3b8; font-size: 0.78rem; font-weight: 600; letter-spacing: .03em; text-transform: uppercase; }
+
+        /* password toggle */
+        .pw-wrapper { position: relative; width: 100%; }
+        .pw-wrapper input[type="password"],
+        .pw-wrapper input[type="text"] {
+            padding-inline-end: 40px; /* מרווח קבוע לעינית */
+            box-sizing: border-box;
+            height: inherit;
+        }
+
+        /* כפתור העינית קטן בתוך השדה (ב‑RTL יהיה בצד שמאל) */
+        .pw-toggle {
+            position: absolute;
+            inset-inline-end: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            padding: 0;
+            margin: 0;
+            border: none;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        /* ביטול אפקטי hover/focus שמרחיבים את הכפתור */
+        .pw-toggle:hover,
+        .pw-toggle:focus {
+            background: transparent !important;
+            box-shadow: none !important;
+            outline: none !important;
+            color: #cbd5e1;
+        }
+
+        .pw-toggle svg { width: 14px; height: 14px; display: block; }
+
+        /* מוודא שהשדה לא ישנה גובה כשהטייפ משתנה */
+        .pw-wrapper input[type="text"],
+        .pw-wrapper input[type="password"] { transition: none; }
     </style>
 </head>
 <body>
     <nav>
+        <a class="brand" href="{% url 'home' %}" aria-label="TaskMaster">
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="TaskMaster logo" focusable="false" width="28" height="28">
+                <title>TaskMaster</title>
+                <path d="M9 2h6a1 1 0 011 1v1h1a2 2 0 012 2v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h1V3a1 1 0 011-1zM12 8a1 1 0 100-2 1 1 0 000 2zM9.3 13.3l-1.6-1.6L6 14l3.3 3.3L18 8.6 16.6 7.3 9.3 13.3z" fill="#6366f1"/>
+            </svg>
+            <span class="brand-title">TaskMaster</span>
+        </a>
+        {% if user.is_authenticated %}
+        <div class="nav-userbox">
+            <p class="nav-username">{{user.username}}</p>
+            <p class="nav-fullname">{{user.first_name}} {{user.last_name}}</p>
+            <p class="nav-role">{{user.worker.role}}</p>
+        </div>
+        {% endif %}
         <a href="{% url 'home' %}">דף הבית</a>
         <a href="{% url 'all_tasks' %}">כל המשימות</a>
         {% if user.is_authenticated %}
@@ -92,10 +189,45 @@
         {% else %}
             <a href="{% url 'login' %}">התחברות</a>
             <a href="{% url 'register' %}">הרשמה</a>
-        {% endif %}
+        {% endif %} 
     </nav>
     <div style="width: 95%; margin: 0 auto; flex-grow: 1;">
         {% block content %}{% endblock %}
     </div>
+    <script>
+document.addEventListener('DOMContentLoaded', function () {
+    // עינית עם פס (למצב סיסמה מוסתרת) ועינית בלי פס (למצב גלוי)
+    const eyeWithSlash = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a19.8 19.8 0 0 1 3.22-4.06"/><path d="M1 1l22 22"/></svg>';
+    const eyeWithoutSlash = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+
+    document.querySelectorAll('input[type="password"]').forEach(function (pw) {
+        if (pw.closest('.pw-wrapper')) return;
+        const wrapper = document.createElement('div');
+        wrapper.className = 'pw-wrapper';
+        pw.parentNode.insertBefore(wrapper, pw);
+        wrapper.appendChild(pw);
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'pw-toggle';
+        btn.setAttribute('aria-label', 'הצג/הסתר סיסמה');
+        btn.setAttribute('aria-pressed', 'false');
+
+        // ברירת מחדל: סיסמה מוסתרת -> מציגים עינית עם פס
+        btn.innerHTML = eyeWithSlash;
+
+        btn.addEventListener('click', function () {
+            const currentlyHidden = pw.type === 'password';
+            pw.type = currentlyHidden ? 'text' : 'password';
+            btn.setAttribute('aria-pressed', String(currentlyHidden));
+            // עדכון aria-label ותצוגת האייקון בהתאם למצב אחרי לחיצה
+            btn.setAttribute('aria-label', currentlyHidden ? 'הסתר סיסמה' : 'הצג סיסמה');
+            btn.innerHTML = currentlyHidden ? eyeWithoutSlash : eyeWithSlash;
+        });
+
+        wrapper.appendChild(btn);
+    });
+});
+    </script>
 </body>
 </html>

@@ -9,9 +9,11 @@ class Team(models.Model):
    name = models.CharField(max_length=50)
    def __str__(self):
       return self.name
+
 class Role(models.TextChoices):
    ADMIN = 'ADMIN','Admin'
    WORKER = 'WORKER','Worker'
+
 class Worker(models.Model):
    id = models.AutoField(primary_key=True)
    user=models.OneToOneField(User,on_delete=models.CASCADE)
@@ -21,10 +23,12 @@ class Worker(models.Model):
    address = models.TextField()
    def __str__(self):
       return f"{self.user.username} {self.role}"
+
 class TaskStatus(models.TextChoices):
       NEW = 'NEW','New'
       ACTIVE = 'ACTIVE','Active'
       FINISHED = 'FINISHED','Finished'
+      
 class Task(models.Model):
    id = models.AutoField(primary_key=True)
    name = models.CharField(max_length=50)

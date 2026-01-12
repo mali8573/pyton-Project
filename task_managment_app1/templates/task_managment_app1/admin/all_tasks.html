@@ -35,7 +35,7 @@
                 </select>
             </div>
 
-            <button type="submit" style="width: 130px; height: 40px; background: #316dca; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">סנן תוצאות</button>
+            <button type="submit" style="width: 130px; height: 40px; background: #316dca; color: white; border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer; margin: 0px;">סנן תוצאות</button>
             <a href="{% url 'all_tasks' %}" style="height: 40px; width: 45px; background: #22272e; border: 1px solid #444c56; border-radius: 8px; color: #768390; display: flex; align-items: center; justify-content: center;" title="נקה הכל">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path><path d="M3 3v5h5"></path></svg>
             </a>
@@ -47,20 +47,23 @@
         <div class="task-card" style="background: #22272e; border: 1px solid #444c56; padding: 18px 25px; border-radius: 12px; display: flex; align-items: center; justify-content: space-between; transition: 0.2s;">
 
             <div style="display: flex; align-items: center; gap: 20px;">
-                <div style="width: 12px; height: 12px; border-radius: 50%; background: {% if task.status == 'NEW' %}#768390{% elif task.status == 'ACTIVE' %}#316dca{% else %}#347d39{% endif %};"></div>
+                <div style="width: 12px; height: 12px; border-radius: 50%; background: {% if task.status == 'NEW' %}#768390 {% elif task.status == 'ACTIVE' %}#316dca{% else %}#347d39{% endif %};"></div>
                 <div style="text-align: right;">
                     <h3 style="margin: 0; font-size: 18px; color: #adbac7; font-weight: 600;">{{task.name}}</h3>
                     <p style="color: #768390; font-size: 13px; margin: 4px 0 0 0;">{{task.description|truncatechars:85}}</p>
+                    <p>{{task.status}}</p>
                 </div>
             </div>
 
             <div style="display: flex; align-items: center; gap: 12px;">
-                {% if task.status == 'NEW' %}
+                {% if task.status == 'NEW'  %}
                     <a href="{% url 'update_status_task' task.id %}" style="text-decoration: none; border: 1px solid #347d39; color: #347d39; font-size: 12px; font-weight: 600; padding: 6px 16px; border-radius: 6px; transition: 0.2s;" onmouseover="this.style.background='#347d39'; this.style.color='white';">שייך אלי</a>
                 {% endif %}
 
                 {% if task.status == 'ACTIVE' %}
-                    <a href="{% url 'update_status_task' task.id %}" style="text-decoration: none; border: 1px solid #347d39; color: #347d39; font-size: 12px; font-weight: 600; padding: 6px 16px; border-radius: 6px; transition: 0.2s;" onmouseover="this.style.background='#347d39'; this.style.color='white';">סיום משימה</a>
+                    {% if task.operator and task.operator.user == user and task.operator.user == user %}
+                        <a href="{% url 'update_status_task' task.id %}" style="text-decoration: none; border: 1px solid #347d39; color: #347d39; font-size: 12px; font-weight: 600; padding: 6px 16px; border-radius: 6px; transition: 0.2s;" onmouseover="this.style.background='#347d39'; this.style.color='white';">סיום משימה</a>
+                    {% endif %}
                 {% endif %}
 
                 {% if user.worker.role == 'ADMIN' %}
