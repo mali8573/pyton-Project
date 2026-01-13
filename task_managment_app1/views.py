@@ -76,6 +76,10 @@ def add_task_view(request):
     if request.method == "POST":
         form = TaskForm(request.POST)
         if form.is_valid():
+            if request.user.worker.role == Role.ADMIN:
+                task = form.save(commit=False)
+                task.team = request.user.worker.team
+                task.save()
             form.save()
             return redirect('all_tasks')
     else:
