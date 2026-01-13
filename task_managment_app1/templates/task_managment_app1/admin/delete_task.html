@@ -1,13 +1,126 @@
 {% extends 'base.html' %}
+
 {% block content %}
-    <div style="font-size: 45px; margin-bottom: 20px;">⚠️</div>
-    <h1 style="color: #ef4444;">Are you sure?</h1>
-    <p style="color: var(--text-dim); margin-bottom: 30px;">You are about to delete:<br><strong style="color: #fff;">{{task.name}}</strong></p>
+<div class="page-wrapper">
+    <div class="confirmation-card">
 
-    <form method="post">
-      {% csrf_token %}
-      <button type="submit" style="border-color: #ef4444; color: #ef4444;">CONFIRM DELETE</button>
-    </form>
+        <div class="icon-container">
+            <span class="warning-icon">⚠️</span>
+        </div>
 
-    <a href="{% url 'all_tasks' %}" style="display: block; margin-top: 20px; color: var(--text-dim); text-decoration: none;">Go back</a>
+        <h1 class="card-title">אישור מחיקה</h1>
+
+        <p class="card-description">
+            האם אתה בטוח שברצונך למחוק את המשימה:<br>
+            <span class="task-name">"{{task.name}}"</span>
+            <br><small class="warning-text">פעולה זו אינה ניתנת לביטול.</small>
+        </p>
+
+        <form method="post" class="action-form">
+            {% csrf_token %}
+            <button type="submit" class="delete-btn">
+                אישור ומחיקה לצמיתות
+            </button>
+        </form>
+
+        <a href="{% url 'all_tasks' %}" class="back-link">
+            ← חזרה לרשימת המשימות
+        </a>
+    </div>
+</div>
+
+<style>
+    /* הגדרות מעטפת עם רווח עליון */
+    .page-wrapper {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start; /* מאפשר לריווח העליון לעבוד */
+        min-height: 80vh;
+        padding-top: 80px; /* הריווח שביקשת למעלה */
+    }
+
+    /* עיצוב הכרטיס */
+    .confirmation-card {
+        background: #1f2937;
+        padding: 40px;
+        border-radius: 20px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        text-align: center;
+        max-width: 400px;
+        width: 100%;
+        border: 1px solid #374151;
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    .icon-container {
+        background: rgba(239, 68, 68, 0.1);
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+    }
+
+    .warning-icon { font-size: 40px; }
+
+    .card-title {
+        color: #ffffff;
+        font-size: 24px;
+        margin-bottom: 10px;
+    }
+
+    .card-description {
+        color: #9ca3af;
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+
+    .task-name {
+        color: #ef4444;
+        font-weight: bold;
+        font-size: 1.1em;
+    }
+
+    .warning-text {
+        display: block;
+        margin-top: 10px;
+        font-size: 12px;
+        opacity: 0.6;
+    }
+
+    /* כפתור */
+    .delete-btn {
+        width: 100%;
+        background-color: #ef4444;
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 10px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .delete-btn:hover {
+        background-color: #dc2626;
+        transform: translateY(-2px);
+    }
+
+    .back-link {
+        display: inline-block;
+        margin-top: 20px;
+        color: #9ca3af;
+        text-decoration: none;
+        transition: 0.2s;
+    }
+
+    .back-link:hover { color: #ffffff; }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 {% endblock %}

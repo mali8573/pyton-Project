@@ -1,0 +1,55 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>404 — הדף לא נמצא</title>
+  <link rel="stylesheet" href="{% static 'css/main.css' %}">
+</head>
+<body>
+  <header>
+    <div class="container" style="display:flex;align-items:center;justify-content:space-between;padding:16px 0;">
+      <a href="/" class="site-brand" aria-label="TaskMaster">
+        <picture>
+          <source srcset="{% static 'media/logo.svg' %}?v=2" type="image/svg+xml">
+          <img src="{% static 'media/logo.svg' %}?v=2" alt="TaskMaster" class="site-logo">
+        </picture>
+        <span class="brand-title">TaskMaster</span>
+      </a>
+
+      <nav class="main-nav" style="direction:rtl;">
+        <a href="/" class="nav-link">דף הבית</a>
+        <a href="/tasks" class="nav-link">כל המשימות</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="error-hero" role="main" aria-labelledby="error-heading">
+    <div class="error-watermark" aria-hidden="true">TASKMASTER</div>
+
+    <div class="error-card">
+      <div class="error-left">
+        <div class="error-code">404</div>
+        <h1 id="error-heading" class="error-title">הדף לא נמצא</h1>
+        <p class="error-desc">הקישור שהקלדת לא קיים או שהדף הועבר. ניתן לחזור לדף הבית או לדווח על הבעיה ונחזור אליך.</p>
+
+        <div style="display:flex;gap:12px;margin-top:18px;flex-wrap:wrap">
+          <a class="btn btn-primary" href="/">חזרה לדף הבית</a>
+          <a class="btn btn-ghost" href="{% url 'all_tasks' %}">לוח המשימות</a>
+        </div>
+      </div>
+
+      <div class="error-illustration" aria-hidden="true">
+        <img src="{% static 'media/404.svg' %}" alt="404">
+      </div>
+    </div>
+  </main>
+
+  <footer style="padding:28px 24px;color:var(--muted);text-align:center">
+    <div style="max-width:1100px;margin:0 auto;">
+      <small>כל הזכויות שמורות © {% now "Y" %} TaskMaster</small>
+    </div>
+  </footer>
+</body>
+</html>

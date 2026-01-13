@@ -26,7 +26,7 @@ SECRET_KEY = "django-insecure-hkuv88@6pxx5pbj1%p)@)l519hv8o5y=3qmfkis**s@z0471g-
 DEBUG = True
 
 ALLOWED_HOSTS = []
-
+    
 
 # Application definition
 
@@ -55,7 +55,7 @@ ROOT_URLCONF = "TaskManagment.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR/'templetes'],
+        "DIRS": [BASE_DIR/'templates'],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [

@@ -1,4 +1,5 @@
-from django.urls import path
+from django.http import HttpResponseNotFound
+from django.urls import path, re_path
 from task_managment_app1 import views
 urlpatterns = [
     path('login/',views.login_view,name='login'),
@@ -11,5 +12,6 @@ urlpatterns = [
     path('delete_task/<int:taskid>', views.delete_task_view, name='delete_task'),
     path('add_team/', views.add_team_view, name='add_team'),
     path('personal_details/', views.personal_datails_view, name='personal_details'),
-    path('error', views.error_view, name='error')
+    path('error', views.error_view, name='error'),
+    re_path(r'^.*$', views.custom_404_view, name='custom_404'),
 ]

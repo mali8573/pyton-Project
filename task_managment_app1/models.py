@@ -31,7 +31,6 @@ class TaskStatus(models.TextChoices):
       ACTIVE = 'ACTIVE','Active'
       FINISHED = 'FINISHED','Finished'
 
-
 def future_date_validator(value):
     if value < timezone.now().date():
         raise ValidationError('The date must be in the future.')
@@ -43,7 +42,7 @@ class Task(models.Model):
    targetDate=models.DateField(validators=[future_date_validator])
    status=models.CharField(max_length=50,choices=TaskStatus.choices,default=TaskStatus.NEW)
    operator=models.ForeignKey('Worker',on_delete=models.SET_NULL,null=True,blank=True)
-   team=models.ForeignKey('Team',on_delete=models.SET_NULL,null=True,blank=True)
+   team=models.ForeignKey('Team',default=None,on_delete=models.CASCADE)
 
    def __str__(self):
       return f"{self.name} {self.status}"
