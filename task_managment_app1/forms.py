@@ -11,11 +11,14 @@ class TaskForm(forms.ModelForm):
         model = Task
         fields = ['name', 'description', 'targetDate','team']
         widgets = {
-            "title":forms.TextInput(attrs={'class':'form-control'}),
+            "name":forms.TextInput(attrs={'class':'form-control'}),
             "description":forms.Textarea(attrs={'class':'form-control'}),
             "targetDate":forms.DateInput(attrs={'class':'form-control','type':'date'}),
             "team":forms.Select(attrs={'class':'form-control'}),
         }
+        # labels = {
+        #     'targetDate': 'Target Date',
+        # }
 
 class UserForm(forms.ModelForm):
     class Meta:

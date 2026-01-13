@@ -32,12 +32,18 @@ def register_view(request):
     else:
         form = UserCreationForm()
     return render(request, 'task_managment_app1/account/register.html', {'form': form})
+
+
 @login_required(login_url='/app1/login')
 def logout_view(request):
     logout(request)
     return redirect('home')
+
+
 def home_view(request):
     return render(request, 'home.html')
+
+
 @login_required(login_url='/app1/login')
 def all_tasks_view(request):
     worker_id=request.GET.get('worker_filter')
@@ -51,26 +57,26 @@ def all_tasks_view(request):
             tasks = Task.objects.none()
     else:
         tasks=Task.objects.all()
-
     if(worker_id and worker_id!="all"):
         tasks=tasks.filter(operator_id=worker_id)
     if(status_val and status_val!="all"):
         tasks=tasks.filter(status=status_val)
     context = {'tasks':tasks,
                 'workers':Worker.objects.all(),
-                'status_choices':TaskStatus.choices
-                     }
+                'status_choices':TaskStatus.choices}
     return render(request, 'task_managment_app1/admin/all_tasks.html',context)
+
+
 @login_required(login_url='/app1/login')
 def add_task_view(request):
     if not hasattr(request.user, 'worker'):
         return redirect('error')
-
     if request.user.worker.role != Role.ADMIN:
         return redirect('error')
     if request.method == "POST":
         form = TaskForm(request.POST)
         if form.is_valid():
+            
             form.save()
             return redirect('all_tasks')
     else:
@@ -94,11 +100,12 @@ def personal_datails_view(request):
         worker_form=PersonalForm(instance=current_worker)
     context = {'user_form':user_form, 'worker_form':worker_form}
     return render(request, 'task_managment_app1/account/personal_details.html',context)
+
+
 @login_required(login_url='/app1/login')
 def add_team_view(request):
     if not hasattr(request.user, 'worker'):
         return redirect('error')
-
     if request.user.worker.role != Role.ADMIN:
         return redirect('error')
     if request.method == "POST":
@@ -109,11 +116,12 @@ def add_team_view(request):
     else:
         form = TeamForm()
     return render(request, 'task_managment_app1/admin/add_team.html',{'form':form})
+
+
 @login_required(login_url='/app1/login')
 def update_task_view(request,taskid):
     if not hasattr(request.user, 'worker'):
         return redirect('error')
-
     if request.user.worker.role != Role.ADMIN:
         return redirect('error')
     task=get_object_or_404(Task, pk=taskid)
@@ -122,17 +130,17 @@ def update_task_view(request,taskid):
         if form.is_valid():
             form.save()
             return redirect('all_tasks')
-
     else:
         if task.status != TaskStatus.NEW:
             return redirect('error')
         form = TaskForm(instance=task)
     return render(request, 'task_managment_app1/admin/add_task.html',{'form':form})
+
+
 @login_required(login_url='/app1/login')
 def delete_task_view(request,taskid):
     if not hasattr(request.user, 'worker'):
         return redirect('error')
-
     if request.user.worker.role != Role.ADMIN:
         return redirect('error')
     task=get_object_or_404(Task, pk=taskid)
@@ -145,6 +153,8 @@ def delete_task_view(request,taskid):
     if task.status != TaskStatus.NEW:
         return redirect('error')
     return render(request, 'task_managment_app1/admin/delete_task.html',{'task':task})
+
+
 @login_required(login_url='/app1/login')
 def update_status_task_view(request,taskid):
     if not hasattr(request.user, 'worker'):
@@ -155,7 +165,6 @@ def update_status_task_view(request,taskid):
             task.status=TaskStatus.ACTIVE
             task.operator=request.user.worker
             task.save()
-
     elif task.status==TaskStatus.ACTIVE:
         if task.operator==request.user.worker:
             task.status=TaskStatus.FINISHED
