@@ -50,7 +50,7 @@ def all_tasks_view(request):
     status_val = request.GET.get('status_filter')
     if not hasattr(request.user, 'worker'):
         return redirect('error')
-    if request.user.worker.role != Role.ADMIN:
+    if request.user.worker.role != Role.SUPER_ADMIN:
         if request.user.worker.team:
             tasks = Task.objects.filter(team=request.user.worker.team)
         else:
@@ -61,25 +61,78 @@ def all_tasks_view(request):
         tasks = tasks.filter(operator_id=worker_id)
     if (status_val and status_val != "all"):
         tasks = tasks.filter(status=status_val)
+    worker = request.user.worker
+    if worker.role == Role.SUPER_ADMIN:
+        workers_list = Worker.objects.all()
+    else:
+        workers_list = Worker.objects.filter(team=worker.team)
     context = {'tasks': tasks,
-               'workers': Worker.objects.all(),
+               'workers': workers_list,
                'status_choices': TaskStatus.choices}
     return render(request, 'task_managment_app1/admin/all_tasks.html', context)
 
 
+# @login_required(login_url='/app1/login')
+# def all_tasks_view(request):
+#     worker_id = request.GET.get('worker_filter')
+#     status_val = request.GET.get('status_filter')
+#
+#     if not hasattr(request.user, 'worker'):
+#         return redirect('error')
+#
+#     worker = request.user.worker
+#
+#     # 1. שליפת בסיס המשימות לפי הרשאות + select_related להבאת שם הצוות
+#     if worker.role != Role.SUPER_ADMIN:
+#         if worker.team:
+#             # מסונן לפי הצוות של העובד
+#             tasks = Task.objects.select_related('team', 'operator__user').filter(team=worker.team)
+#         else:
+#             tasks = Task.objects.none()
+#     else:
+#         # סופר אדמין רואה הכל
+#         tasks = Task.objects.select_related('team', 'operator__user').all()
+#
+#     # 2. החלת הסינונים מה-GET (כאן מתבצע הסינון בפועל)
+#     if worker_id and worker_id != "all":
+#         tasks = tasks.filter(operator_id=worker_id)
+#
+#     if status_val and status_val != "all":
+#         tasks = tasks.filter(status=status_val)
+#
+#     # 3. רשימת העובדים לסינון (לפי צוות או הכל)
+#     if worker.role == Role.SUPER_ADMIN:
+#         workers_list = Worker.objects.select_related('user').all()
+#     else:
+#         workers_list = Worker.objects.select_related('user').filter(team=worker.team)
+#
+#     context = {
+#         'tasks': tasks,  # המשימות המסוננות
+#         'workers': workers_list,
+#         'status_choices': TaskStatus.choices
+#     }
+#     return render(request, 'task_managment_app1/admin/all_tasks.html', context)
 @login_required(login_url='/app1/login')
 def add_task_view(request):
     if not hasattr(request.user, 'worker'):
         return redirect('error')
-    if request.user.worker.role != Role.ADMIN:
+    worker = request.user.worker
+    if worker.role not in [Role.SUPER_ADMIN, Role.ADMIN]:
         return redirect('error')
+
     if request.method == "POST":
-        form = TaskForm(request.POST)
+        form = TaskForm(request.POST,user=request.user)
         if form.is_valid():
-            form.save()
+            task = form.save(commit=False)
+
+
+            if worker.role == Role.ADMIN:
+                task.team = worker.team
+
+            task.save()
             return redirect('all_tasks')
     else:
-        form = TaskForm()
+        form = TaskForm(user=request.user)
     return render(request, 'task_managment_app1/admin/add_task.html', {'form': form})
 
 
@@ -105,7 +158,7 @@ def personal_datails_view(request):
 def add_team_view(request):
     if not hasattr(request.user, 'worker'):
         return redirect('error')
-    if request.user.worker.role != Role.ADMIN:
+    if request.user.worker.role != Role.SUPER_ADMIN:
         return redirect('error')
     if request.method == "POST":
         form = TeamForm(request.POST)
@@ -121,18 +174,19 @@ def add_team_view(request):
 def update_task_view(request, taskid):
     if not hasattr(request.user, 'worker'):
         return redirect('error')
-    if request.user.worker.role != Role.ADMIN:
-        return redirect('error')
+    worker = request.user.worker
     task = get_object_or_404(Task, pk=taskid)
+    if not (worker.role == Role.SUPER_ADMIN or (worker.role == Role.ADMIN and task.team == worker.team)):
+        return redirect('error')
     if request.method == "POST":
-        form = TaskForm(request.POST, instance=task)
+        form = TaskForm(request.POST, instance=task, user=request.user)
         if form.is_valid():
             form.save()
             return redirect('all_tasks')
     else:
         if task.status != TaskStatus.NEW:
             return redirect('error')
-        form = TaskForm(instance=task)
+        form = TaskForm(instance=task, user=request.user)
     return render(request, 'task_managment_app1/admin/add_task.html', {'form': form})
 
 
@@ -140,9 +194,14 @@ def update_task_view(request, taskid):
 def delete_task_view(request, taskid):
     if not hasattr(request.user, 'worker'):
         return redirect('error')
-    if request.user.worker.role != Role.ADMIN:
-        return redirect('error')
+
+    worker = request.user.worker
     task = get_object_or_404(Task, pk=taskid)
+    is_authorized = (worker.role == Role.SUPER_ADMIN) or \
+                    (worker.role == Role.ADMIN and task.team == worker.team)
+
+    if not is_authorized:
+        return redirect('error')
     if request.method == "POST":
         if task.status != TaskStatus.NEW:
             return redirect('error')
@@ -159,13 +218,16 @@ def update_status_task_view(request, taskid):
     if not hasattr(request.user, 'worker'):
         return redirect('error')
     task = get_object_or_404(Task, pk=taskid)
+    worker = request.user.worker
+    if task.team != worker.team and worker.role != Role.SUPER_ADMIN:
+        return redirect('error')
     if task.status == TaskStatus.NEW:
         if task.team == request.user.worker.team:
             task.status = TaskStatus.ACTIVE
             task.operator = request.user.worker
             task.save()
     elif task.status == TaskStatus.ACTIVE:
-        if task.operator == request.user.worker:
+        if task.operator ==worker:
             task.status = TaskStatus.FINISHED
             task.save()
     return redirect('all_tasks')

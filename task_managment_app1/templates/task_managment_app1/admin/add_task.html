@@ -7,10 +7,20 @@
         <h2 style="color: #ffffff; margin-bottom: 5px;">הוספת משימה</h2>
         <p style="color: #94a3b8; margin-bottom: 30px;">הזן פרטים כדי להמשיך</p>
 
-        <form method="post">
+       <form method="post" novalidate>
             {% csrf_token %}
             <div class="form-styling">
-                {{ form.as_p }}
+                {% for field in form %}
+                    <p>
+                        {{ field.label_tag }}
+                        {{ field }}
+                        {% if field.errors %}
+                            {% for error in field.errors %}
+                                <span class="error-message">{{ error }}</span>
+                            {% endfor %}
+                        {% endif %}
+                    </p>
+                {% endfor %}
             </div>
             <button type="submit">צור משימה</button>
         </form>

@@ -15,6 +15,7 @@ class Team(models.Model):
 class Role(models.TextChoices):
    ADMIN = 'ADMIN','Admin'
    WORKER = 'WORKER','Worker'
+   SUPER_ADMIN = 'SUPER_ADMIN', 'Super_Admin'
 
 class Worker(models.Model):
    id = models.AutoField(primary_key=True)
@@ -42,7 +43,7 @@ class Task(models.Model):
    targetDate=models.DateField(validators=[future_date_validator])
    status=models.CharField(max_length=50,choices=TaskStatus.choices,default=TaskStatus.NEW)
    operator=models.ForeignKey('Worker',on_delete=models.SET_NULL,null=True,blank=True)
-   team=models.ForeignKey('Team',default=None,on_delete=models.CASCADE)
+   team=models.ForeignKey('Team',on_delete=models.CASCADE)
 
    def __str__(self):
       return f"{self.name} {self.status}"
