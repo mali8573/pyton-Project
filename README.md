@@ -39,10 +39,12 @@ A significant technical challenge was implementing a multi-level permission syst
    Install dependencies:
 
 2.Install dependencies:
-pip install django
-Run migrations and start the server:
+ ```bash
+ pip install django
+ Run migrations and start the server:
 
 
 3.Run migrations and start the server:
-python manage.py migrate
-python manage.py runserver
+ ```bash
+ python manage.py migrate
+ python manage.py runserver
