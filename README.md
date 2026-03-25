@@ -36,15 +36,15 @@ A significant technical challenge was implementing a multi-level permission syst
 1. Clone the repository:
    ```bash
    git clone [your-repository-link]
-   Install dependencies:
+  
 
-2.Install dependencies:
- ```bash
- pip install django
- Run migrations and start the server:
+2. Install dependencies:
+   ```bash
+   pip install django
+   Run migrations and start the server:
 
 
-3.Run migrations and start the server:
- ```bash
- python manage.py migrate
- python manage.py runserver
+3. Run migrations and start the server:
+   ```bash
+   python manage.py migrate
+   python manage.py runserver
